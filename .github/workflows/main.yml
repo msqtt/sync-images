@@ -8,16 +8,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: set-up-docker
+      - name: Set up docker
         uses: docker/setup-docker-action@v4.3.0
       
-      - name: read-config-yaml
+      - name: Read config yaml
         uses: actions-tools/yaml-outputs@v2
         id: yaml
         with:
           file-path: './config.yaml'
 
-      - name: aggregate-images
+      - name: Aggregate images
         id: aggregate
         run: | 
           images=()
@@ -27,7 +27,7 @@ jobs:
           done <<< "$env_vars"
           echo "source__images=${images[*]}" >> $GITHUB_ENV
 
-      - name: pull-rename-images 
+      - name: Pull and rename images 
         run: |
           # Extract the array from the environment variable
           images=$(echo ${{ env.source__images }} | tr -d '[]' | tr ',' ' ')
@@ -44,10 +44,10 @@ jobs:
           done
           echo "target__images=${new_images[*]}" >> $GITHUB_ENV
 
-      - name: push-images
+      - name: Push images
         run: |
           # login
-          docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }} \
+          docker login --username="${{ secrets.DOCKER_USERNAME }}" --password="${{ secrets.DOCKER_PASSWORD }}" \
             ${{ env.target__host }}
 
           images=$(echo ${{ env.target__images }} | tr -d '[]' | tr ',' ' ')
