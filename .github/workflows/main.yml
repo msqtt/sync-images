@@ -4,9 +4,6 @@ on:
   push:
     paths:
       - 'config.yaml'
-  pull_request:
-    paths:
-      - 'config.yaml'
 permissions:
   contents: write
 jobs:
