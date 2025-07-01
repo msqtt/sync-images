@@ -1,6 +1,8 @@
 source:
   images:
     - 'hello-world'
+    - 'mysql/mysql-server:5.7.35'
+    - 'minio/minio'
 target:
   namespace: msqtt
   host: crpi-xfetgbp7ecrkq0hc.cn-guangzhou.personal.cr.aliyuncs.com
