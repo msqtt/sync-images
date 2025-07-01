@@ -63,9 +63,9 @@ jobs:
           
           echo "## Latest synchronized images 🐳" > README.md
           for image in $images; do
-            echo "* $image" >> README.md
+            echo "* [$image]()" >> README.md
           done
-          echo "This file was updated by GitHub Actions." >> README.md
+          echo "\nThis file was updated by GitHub Actions." >> README.md
 
       - name: Commit and push README.md
         run: |
