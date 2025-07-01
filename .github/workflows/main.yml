@@ -55,3 +55,26 @@ jobs:
             echo "=== Pushing image: $image ==="
             docker push $image
           done
+
+      - name: Modify README.md
+        run: |
+          images=$(echo ${{ env.target__images }} | tr -d '[]' | tr ',' ' ')
+          
+          echo "## Latest synchronized images 🐳" > README.md
+          for image in $images; do
+            echo "* $image" >> README.md
+          done
+          echo "This file was updated by GitHub Actions." >> README.md
+
+      - name: Commit and push README.md
+        run: |
+          # 配置 Git 用户信息
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 添加更改
+          git add README.md
+          git commit -m "Update README.md via GitHub Actions" || true
+
+          # 推送到仓库
+          git push origin HEAD
