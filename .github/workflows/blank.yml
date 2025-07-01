@@ -1,0 +1,38 @@
+name: sync-images
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4.3.0
+      
+      - name: Read Config Yaml
+        uses: actions-tools/yaml-outputs@v2
+        id: yaml
+        with:
+          file-path: './config.yaml'
+
+      - name: Aggregate Images
+        id: aggregate
+        run: | 
+          images=()
+          env_vars=$(env | grep '^source__images__')
+          while IFS='=' read -r key value; do
+            images+=("$value")
+          done <<< "$env_vars"
+          echo "source__images=${images[*]}" >> $GITHUB_ENV
+
+      - name: Pull images
+        run: |
+          # Extract the array from the environment variable
+          images=$(echo ${{ env.source__images }} | tr -d '[]' | tr ',' ' ')
+          
+          for image in $images; do
+            echo "Processing image: $image"
+          done
+        
