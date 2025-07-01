@@ -1,6 +1,12 @@
 name: sync-images 🐳
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'config.yaml'
+  pull_request:
+    paths:
+      - 'config.yaml'
 permissions:
   contents: write
 jobs:
@@ -65,7 +71,7 @@ jobs:
           for image in $images; do
             echo "* [$image]()" >> README.md
           done
-          echo "\nThis file was updated by GitHub Actions." >> README.md
+          echo -e "\nThis file was updated by GitHub Actions." >> README.md
 
       - name: Commit and push README.md
         run: |
