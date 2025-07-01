@@ -44,7 +44,7 @@ jobs:
             echo "=== Pulling image: $image ==="
             docker pull $image
             
-            new_tag="${{ env.target__host }}/${{ env.target__namespace }}/${image#*/}"
+            new_tag="${{ env.target__host }}/${{ env.target__namespace }}/${image##*/}"
             new_images+=("$new_tag")
             echo "=== Renaming image: $new_tag ==="
             docker tag $image $new_tag
