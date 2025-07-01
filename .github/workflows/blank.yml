@@ -1,9 +1,9 @@
-name: sync-images
+name: sync-images🐳
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  sync-job:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,12 +27,21 @@ jobs:
           done <<< "$env_vars"
           echo "source__images=${images[*]}" >> $GITHUB_ENV
 
-      - name: Pull images
+      - name: Pull And Rename Images 
         run: |
           # Extract the array from the environment variable
           images=$(echo ${{ env.source__images }} | tr -d '[]' | tr ',' ' ')
-          
+
+          new_images=()
           for image in $images; do
-            echo "Processing image: $image"
+            echo "=== Pulling image: $image ==="
+            docker pull $image
+            
+            new_tag="${{ env.target__host }}/${{ env.target__namespace }}/${image#*/}"
+            new_images+=("$new_tag")
+            echo "=== Rename to: $new_tag ==="
+            docker tag $image $new_tag
           done
+          echo "target__images=${new_images[*]}" >> $GITHUB_ENV
+
         
