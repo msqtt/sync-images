@@ -1,4 +1,4 @@
 ## Latest synchronized images 🐳
-* [crpi-xfetgbp7ecrkq0hc.cn-guangzhou.personal.cr.aliyuncs.com/msqtt/cloudflared]()
+* [crpi-xfetgbp7ecrkq0hc.cn-guangzhou.personal.cr.aliyuncs.com/msqtt/mongo:5]()
 
 This file was updated by GitHub Actions.
