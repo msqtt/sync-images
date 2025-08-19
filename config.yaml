@@ -1,6 +1,6 @@
 source:
   images:
-    - 'pgvector/pgvector:pg16'
+    - 'mongo:5'
 target:
   namespace: msqtt
   host: crpi-xfetgbp7ecrkq0hc.cn-guangzhou.personal.cr.aliyuncs.com
