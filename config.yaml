@@ -1,6 +1,6 @@
 source:
   images:
-    - 'mongo:5'
+    - 'nanajanashia/k8s-demo-app:v1.0'
 target:
   namespace: msqtt
   host: crpi-xfetgbp7ecrkq0hc.cn-guangzhou.personal.cr.aliyuncs.com
