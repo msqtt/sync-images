@@ -1,6 +1,7 @@
 source:
   images:
     - 'grafana/grafana:latest'
+    - 'prom/prometheus:latest'
 target:
   namespace: msqtt
   host: crpi-xfetgbp7ecrkq0hc.cn-guangzhou.personal.cr.aliyuncs.com
