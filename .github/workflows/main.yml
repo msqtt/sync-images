@@ -12,8 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up docker
-        uses: docker/setup-docker-action@v4.3.0
+      - name: Install Crane
+        run: |
+          curl -L https://github.com/google/go-containerregistry/releases/latest/download/go-containerregistry_Linux_x86_64.tar.gz | tar xz -C /usr/local/bin/ crane
+          chmod +x /usr/local/bin/crane
       
       - name: Read config yaml
         uses: actions-tools/yaml-outputs@v2
@@ -31,44 +33,39 @@ jobs:
           done <<< "$env_vars"
           echo "source__images=${images[*]}" >> $GITHUB_ENV
 
-      - name: Pull and rename images 
+      - name: Copy images with Crane
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           # Extract the array from the environment variable
           images=$(echo ${{ env.source__images }} | tr -d '[]' | tr ',' ' ')
 
           new_images=()
           for image in $images; do
-            echo "=== Pulling image: $image ==="
-            docker pull $image
-            
             new_tag="${{ env.target__host }}/${{ env.target__namespace }}/${image##*/}"
             new_images+=("$new_tag")
-            echo "=== Renaming image: $new_tag ==="
-            docker tag $image $new_tag
+            echo "=== Copying image: $image -> $new_tag ==="
+            crane copy $image $new_tag --insecure
           done
           echo "target__images=${new_images[*]}" >> $GITHUB_ENV
-
-      - name: Push images
-        run: |
-          # login
-          docker login --username="${{ secrets.DOCKER_USERNAME }}" --password="${{ secrets.DOCKER_PASSWORD }}" \
-            ${{ env.target__host }}
-
-          images=$(echo ${{ env.target__images }} | tr -d '[]' | tr ',' ' ')
-          for image in $images; do
-            echo "=== Pushing image: $image ==="
-            docker push $image
-          done
 
       - name: Modify README.md
         run: |
           images=$(echo ${{ env.target__images }} | tr -d '[]' | tr ',' ' ')
+          timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
           
-          echo "## Latest synchronized images 🐳" > README.md
+          # Preserve historical records by appending instead of overwriting
+          if [ ! -f README.md ]; then
+            echo "# Docker Image Synchronization History" > README.md
+            echo "" >> README.md
+          fi
+          
+          echo "## Sync at $timestamp" >> README.md
           for image in $images; do
             echo "* [$image]()" >> README.md
           done
-          echo -e "\nThis file was updated by GitHub Actions." >> README.md
+          echo "" >> README.md
 
       - name: Commit and push README.md
         run: |
