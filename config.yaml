@@ -1,6 +1,7 @@
 source:
   images:
     - 'ghcr.io/msqtt/nacos-switch-check:main'
+    
 target:
   namespace: msqtt
   host: crpi-xfetgbp7ecrkq0hc.cn-guangzhou.personal.cr.aliyuncs.com
