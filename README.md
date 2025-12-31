@@ -9,3 +9,6 @@ This file was updated by GitHub Actions.
 ## Sync at 2025-12-31 03:57:51 UTC
 * [crpi-xfetgbp7ecrkq0hc.cn-guangzhou.personal.cr.aliyuncs.com/msqtt/nacos-switch-check:main]()
 
+## Sync at 2025-12-31 06:26:42 UTC
+* [crpi-xfetgbp7ecrkq0hc.cn-guangzhou.personal.cr.aliyuncs.com/msqtt/nacos-switch-check:main]()
+
