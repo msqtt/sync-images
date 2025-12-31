@@ -60,8 +60,9 @@ jobs:
           
           # Preserve historical records by appending instead of overwriting
           if [ ! -f README.md ]; then
-            echo "# Docker Image Synchronization History" > README.md
+            echo "## Docker Image Synchronization History 🐳" > README.md
             echo "" >> README.md
+            echo "(This file was updated by GitHub Actions.)" >> README.md
           fi
           
           echo "## Sync at $timestamp" >> README.md
