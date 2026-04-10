@@ -8,3 +8,6 @@ This file was updated by GitHub Actions.
 ## Sync at 2025-12-31 06:47:29 UTC
 * [crpi-xfetgbp7ecrkq0hc.cn-guangzhou.personal.cr.aliyuncs.com/msqtt/nacos-switch-check:main]()
 
+## Sync at 2026-04-10 07:14:28 UTC
+* [crpi-xfetgbp7ecrkq0hc.cn-guangzhou.personal.cr.aliyuncs.com/msqtt/python:3.11-slim]()
+
