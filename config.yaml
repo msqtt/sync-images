@@ -1,6 +1,6 @@
 source:
   images:
-    - 'ghcr.io/msqtt/nacos-switch-check:main'
+    - 'python:3.11-slim'
 target:
   namespace: msqtt
   host: crpi-xfetgbp7ecrkq0hc.cn-guangzhou.personal.cr.aliyuncs.com
