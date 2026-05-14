@@ -49,7 +49,7 @@ jobs:
             new_tag="${{ env.target__host }}/${{ env.target__namespace }}/${image##*/}"
             new_images+=("$new_tag")
             echo "=== Copying image: $image -> $new_tag ==="
-            crane copy $image $new_tag --insecure
+            crane copy $image $new_tag --insecure --platform linux/amd64
           done
           echo "target__images=${new_images[*]}" >> $GITHUB_ENV
 
