@@ -1,6 +1,6 @@
 source:
   images: 
-    - 'n8nio/n8n:latest'
+    - 'hello-world'
     - 'n8nio/n8n:2.4.4'
 target:
   namespace: msqtt
