@@ -48,7 +48,7 @@ jobs:
             new_images+=("$new_tag")
             echo "=== Copying image: $image -> $new_tag ==="
 
-            raw=$(skopeo inspect --raw --src-tls-verify=false "docker://$image")
+            raw=$(skopeo inspect --raw --tls-verify=false "docker://$image")
 
             if echo "$raw" | grep -q '"manifests"'; then
               # Multi-arch: copy each real platform individually, then combine
