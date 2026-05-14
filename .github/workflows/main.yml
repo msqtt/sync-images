@@ -78,16 +78,7 @@ jobs:
                   "docker://$image" "docker://$ptag"
 
                 platform_tags+=("$ptag")
-              done < <(echo "$raw" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-for m in d.get('manifests', []):
-    p = m.get('platform', {})
-    os_, arch = p.get('os', ''), p.get('architecture', '')
-    if os_ and arch and os_ != 'unknown' and arch != 'unknown':
-        variant = p.get('variant', '')
-        print(f'{os_}/{arch}' + (f'/{variant}' if variant else ''))
-")
+              done < <(echo "$raw" | python3 -c "import sys,json;d=json.load(sys.stdin);[print(p['os']+'/'+p['architecture']+('/'+p['variant'] if p.get('variant') else '')) for m in d.get('manifests',[]) for p in [m.get('platform',{})] if p.get('os') not in ('','unknown') and p.get('architecture') not in ('','unknown')]")
 
               # Combine into a Docker manifest list
               docker buildx imagetools create -t "$new_tag" "${platform_tags[@]}"
