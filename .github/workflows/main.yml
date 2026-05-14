@@ -31,8 +31,13 @@ jobs:
 
       - name: Copy images with Skopeo
         run: |
-          # Setup Docker authentication for target registry
-          echo "${{ secrets.DOCKER_PASSWORD }}" | skopeo login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin "${{ env.target__host }}"
+          # Login to target registry
+          echo "${{ secrets.DOCKER_PASSWORD }}" | skopeo login \
+            -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin \
+            "${{ env.target__host }}"
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login \
+            -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin \
+            "${{ env.target__host }}"
 
           # Extract the array from the environment variable
           images=$(echo ${{ env.source__images }} | tr -d '[]' | tr ',' ' ')
@@ -42,12 +47,57 @@ jobs:
             new_tag="${{ env.target__host }}/${{ env.target__namespace }}/${image##*/}"
             new_images+=("$new_tag")
             echo "=== Copying image: $image -> $new_tag ==="
-            skopeo copy \
-              --all \
-              --format v2s2 \
-              --src-tls-verify=false \
-              docker://$image \
-              docker://$new_tag
+
+            raw=$(skopeo inspect --raw --src-tls-verify=false "docker://$image")
+
+            if echo "$raw" | grep -q '"manifests"'; then
+              # Multi-arch: copy each real platform individually, then combine
+              platform_tags=()
+
+              # Extract real platforms, skipping attestations (os=unknown)
+              while IFS= read -r platform; do
+                [[ -z "$platform" ]] && continue
+                os_=$(echo "$platform" | cut -d/ -f1)
+                arch_=$(echo "$platform" | cut -d/ -f2)
+                variant_=$(echo "$platform" | cut -d/ -f3)
+
+                arch_slug=$(echo "$platform" | tr '/' '-')
+                ptag="${new_tag%%:*}:${new_tag##*:}-${arch_slug}"
+
+                variant_flag=""
+                [[ -n "$variant_" ]] && variant_flag="--override-variant $variant_"
+
+                echo "  → $platform: $ptag"
+                # shellcheck disable=SC2086
+                skopeo copy \
+                  --format v2s2 \
+                  --src-tls-verify=false \
+                  --override-os "$os_" \
+                  --override-arch "$arch_" \
+                  $variant_flag \
+                  "docker://$image" "docker://$ptag"
+
+                platform_tags+=("$ptag")
+              done < <(echo "$raw" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+for m in d.get('manifests', []):
+    p = m.get('platform', {})
+    os_, arch = p.get('os', ''), p.get('architecture', '')
+    if os_ and arch and os_ != 'unknown' and arch != 'unknown':
+        variant = p.get('variant', '')
+        print(f'{os_}/{arch}' + (f'/{variant}' if variant else ''))
+")
+
+              # Combine into a Docker manifest list
+              docker buildx imagetools create -t "$new_tag" "${platform_tags[@]}"
+            else
+              # Single-arch: copy directly
+              skopeo copy \
+                --format v2s2 \
+                --src-tls-verify=false \
+                "docker://$image" "docker://$new_tag"
+            fi
           done
           echo "target__images=${new_images[*]}" >> $GITHUB_ENV
 
