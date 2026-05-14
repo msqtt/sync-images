@@ -12,10 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Crane
-        run: |
-          curl -L https://github.com/google/go-containerregistry/releases/latest/download/go-containerregistry_Linux_x86_64.tar.gz | tar xz -C /usr/local/bin/ crane
-          chmod +x /usr/local/bin/crane
       
       - name: Read config yaml
         uses: actions-tools/yaml-outputs@v2
@@ -33,14 +29,11 @@ jobs:
           done <<< "$env_vars"
           echo "source__images=${images[*]}" >> $GITHUB_ENV
 
-      - name: Copy images with Crane
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Copy images with Skopeo
         run: |
           # Setup Docker authentication for target registry
-          echo "${{ secrets.DOCKER_PASSWORD }}" | crane auth login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin "${{ env.target__host }}"
-          
+          echo "${{ secrets.DOCKER_PASSWORD }}" | skopeo login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin "${{ env.target__host }}"
+
           # Extract the array from the environment variable
           images=$(echo ${{ env.source__images }} | tr -d '[]' | tr ',' ' ')
 
@@ -49,7 +42,12 @@ jobs:
             new_tag="${{ env.target__host }}/${{ env.target__namespace }}/${image##*/}"
             new_images+=("$new_tag")
             echo "=== Copying image: $image -> $new_tag ==="
-            crane copy $image $new_tag --insecure --platform linux/amd64
+            skopeo copy \
+              --all \
+              --format v2s2 \
+              --src-tls-verify=false \
+              docker://$image \
+              docker://$new_tag
           done
           echo "target__images=${new_images[*]}" >> $GITHUB_ENV
 
